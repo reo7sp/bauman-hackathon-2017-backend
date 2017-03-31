@@ -14,7 +14,8 @@ class AuthController < ApplicationController
   def signup
     @user = User.new(email: params[:email], password: params[:password])
     if @user.save
-      render json: { ok: 1 }, status: :created
+      @session = Session.create!(token: rand(2 ** 32).to_s(16), user: @user)
+      render json: { token: @session.token }
     else
       render json: @user.errors, status: :unprocessable_entity
     end
