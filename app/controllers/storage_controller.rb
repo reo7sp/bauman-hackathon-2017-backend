@@ -3,8 +3,14 @@ class StorageController < ApplicationController
 
   before_action :auth!
 
+  def info
+    render json: { last_modified: File.mtime(user_path) }
+  rescue IOError
+    render json: { error: 'file not found' }, status: :not_found
+  end
+
   def get
-    send_file user_path, filename: File.basename(params[:path])
+    send_file(user_path, filename: File.basename(params[:path]))
   rescue ActionController::MissingFile
     render json: { error: 'file not found' }, status: :not_found
   end

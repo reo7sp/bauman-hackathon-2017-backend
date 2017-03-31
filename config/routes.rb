@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
   post 'auth/signup'
   post 'auth/register_device'
-  post 'storage/get'
+
+  get 'storage/info'
+  get 'storage/get'
   post 'storage/set'
   post 'storage/delete'
 
