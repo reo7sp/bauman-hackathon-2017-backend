@@ -1,0 +1,1 @@
+json.partial! "storage_files/storage_file", storage_file: @storage_file

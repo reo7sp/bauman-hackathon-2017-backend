@@ -2,41 +2,47 @@ class StorageController < ApplicationController
   include AuthConcern
 
   before_action :auth!
+  before_action :create_storage_file, only: :set
+  before_action :set_storage_file, except: :index
+
+  def index
+    @storage_files = StorageFile.where(user: @user)
+    if params.has_key?(:since)
+      since_time = params[:since].to_i
+      @storage_files = @storage_files.to_a.select { |file| file.updated_at >= since_time }
+    end
+    render 'storage_files/index.json.jbuilder'
+  end
 
   def info
-    render json: { last_modified: File.mtime(user_path) }
-  rescue IOError
-    render json: { error: 'file not found' }, status: :not_found
+    render 'storage_files/show.json.jbuilder'
   end
 
   def get
-    send_file(user_path, filename: File.basename(params[:path]))
-  rescue ActionController::MissingFile
-    render json: { error: 'file not found' }, status: :not_found
+    send_file(@storage_file.abs_path, filename: File.basename(@storage_file.name))
   end
 
   def set
-    FileUtils.mkdir_p(user_root)
-    File.binwrite(user_path, params[:data])
-    render json: { ok: 1 }
-  rescue SystemCallError, IOError
-    render json: { error: 'io' }, status: :internal_server_error
+    @storage_file.write(params[:data])
+    render 'storage_files/show.json.jbuilder'
   end
 
   def delete
-    File.delete(user_path)
+    @storage_file.destroy
     render json: { ok: 1 }
-  rescue SystemCallError, IOError
-    render json: { error: 'io' }, status: :internal_server_error
   end
 
   private
 
-  def user_root
-    File.join(Rails.configuration.x.storage_root, Digest::MD5.hexdigest(@user.email))
+  def create_storage_file
+    @storage_file = StorageFile.find_by(name: params[:path], user: @user)
+    if @storage_file.nil?
+      new_path = File.join(Digest::MD5.hexdigest(@user.email), Digest::MD5.hexdigest(params[:path]))
+      @storage_file = StorageFile.create!(name: params[:path], user: @user, path: new_path)
+    end
   end
 
-  def user_path(path = params[:path])
-    File.join(user_root, Digest::MD5.hexdigest(path))
+  def set_storage_file
+    @storage_file ||= StorageFile.find_by!(name: params[:path], user: @user)
   end
 end

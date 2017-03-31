@@ -1,0 +1,1 @@
+json.array! @storage_files, partial: 'storage_files/storage_file', as: :storage_file
