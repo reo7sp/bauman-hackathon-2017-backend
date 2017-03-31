@@ -27,6 +27,6 @@ module BaumanHackathon2017Backend
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    config.x.storage_root = '/var/lib/bauman-hackathon-2017-backend'
+    config.x.storage_root = ENV['STORAGE_ROOT'] || '/var/lib/bauman-hackathon-2017-backend'
   end
 end
