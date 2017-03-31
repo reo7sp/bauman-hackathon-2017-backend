@@ -9,7 +9,7 @@ module AuthConcern
   end
 
   def auth
-    @user = User.find_by(email: params[:email]).try(:authenticate, params[:password])
+    @user = Session.find_by(token: params[:token]).try(:user)
   end
 
   def auth!
