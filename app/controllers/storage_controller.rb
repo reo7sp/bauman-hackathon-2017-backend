@@ -23,7 +23,12 @@ class StorageController < ApplicationController
   end
 
   def set
-    @storage_file.write(params[:data])
+    case params[:data]
+    when ActionDispatch::Http::UploadedFile
+      @storage_file.write(params[:data].read)
+    else
+      @storage_file.write(params[:data])
+    end
     render 'storage_files/show.json.jbuilder'
   end
 
