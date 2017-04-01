@@ -6,7 +6,7 @@ class StorageFile < ApplicationRecord
   validates :path, presence: true, uniqueness: true
 
   after_create do |file|
-    FileUtils.mkdir_p(Rails.configuration.x.storage_root)
+    FileUtils.mkdir_p(File.dirname(file.abs_path))
     File.write(file.abs_path, '')
   end
 
